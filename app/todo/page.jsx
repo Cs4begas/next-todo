@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import StatusDropDown  from "../components/status_dropdown"
+import StatusDropDown from "../components/status_dropdown"
 
 function Page() {
 
@@ -39,6 +39,8 @@ function Page() {
                     todos.map((todo, index) => (
                         <li key={index}>
                             {todo.name} <StatusDropDown onStatusChange={(status) => handleStatusChange(index, status)}></StatusDropDown>
+                            <button>Edit</button>
+                            <button>Delete</button>
                         </li>
                     ))
 

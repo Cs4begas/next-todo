@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export default function StatusDropDown({ onStatusChange }) {
     const dropDownlist = ['Started', 'Pending', 'Done']
-    const [selectedStatus, setSelectedStatus] = useState(dropDownlist[0]);
+    const [selectedStatus, setSelectedStatus] = useState();
 
     const handleChange = (event) => {
         const newValue = event.target.value;
