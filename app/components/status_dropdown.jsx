@@ -1,7 +1,7 @@
 'use client'
-import { useState } from "react";
+import { useEffect ,useState } from "react";
 
-export default function StatusDropDown({ onStatusChange }) {
+export default function StatusDropDown({ dropDownStatus , onStatusChange }) {
     const dropDownlist = ['Started', 'Pending', 'Done']
     const [selectedStatus, setSelectedStatus] = useState();
 
@@ -10,6 +10,17 @@ export default function StatusDropDown({ onStatusChange }) {
         setSelectedStatus(newValue);
         onStatusChange(newValue);
     };
+
+    useEffect(() => {
+        handleStatus();
+    },[])
+
+    async function handleStatus(){
+        let defaultStatus = dropDownlist.filter(data => data == dropDownStatus);
+        if(defaultStatus){
+            setSelectedStatus(defaultStatus)
+        }
+    }
 
     return (
         <select name="statusList" id="statusList" value={selectedStatus} onChange={handleChange}>
