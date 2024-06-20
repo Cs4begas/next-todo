@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import StatusDropDown from "../components/status_dropdown"
 import Link from 'next/link'
 import { getUserEmail } from './action'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import the FontAwesomeIcon component
+import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 
 function Page() {
@@ -26,7 +28,7 @@ function Page() {
 
     useEffect(() => {
         getTodo(),
-        fetchUserEmail()
+            fetchUserEmail()
     }, [refresh])
 
     const fetchUserEmail = async () => {
@@ -41,10 +43,10 @@ function Page() {
             [index]: status,
             status: status
         }));
-    
+
         console.log('Status to be updated:', status); // Log the status directly
-    
-        await putTodo(todo.id,status)
+
+        await putTodo(todo.id, status)
         setRefresh(!refresh)
         console.log('Prod', todo.status)
         console.log(index, status)
@@ -95,27 +97,42 @@ function Page() {
     }
     return (
         <>
-            <div>
-                User Email : {userEmail}
+            <div className="container">
+                <div className="max-w-2xl mx-auto my-2">
+                    <div>
+                        User Email : {userEmail}
+                    </div>
+                    <div className="flex items-center">
+                        <input onChange={handleTextChange} className="input input-bordered w-full my-2" name="name" type="text" placeholder="Type Here" value={textVal} />
+                        <button onClick={handleAddVal} className="btn btn-primary ml-1">Add</button>
+                    </div>
+                    <ul>
+                        {
+                            todos.map((todo, index) => (
+                                <li key={index} className="flex items-center justify-between my-2">
+                                    <div>
+                                        {todo.name} <StatusDropDown dropDownStatus={todo.status} onStatusChange={(status) => handleStatusChange(todo, index, status)}></StatusDropDown>
+                                    </div>
+                                    <div>
+                                        <Link href={`todo/${todo.id}`}>
+                                            <button className="btn btn-square btn-outline ml-2">
+                                                <FontAwesomeIcon icon={faPen} />
+                                            </button>
+                                        </Link>
+                                        <button className="btn btn-square btn-outline ml-2" onClick={() => handleDelete(todo.id)}><FontAwesomeIcon icon={faTrash} /></button>
+                                    </div>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                </div>
+                <style jsx>{`
+                    svg{
+                        fill: white
+                    }
+                `}
+                </style>
             </div>
-            <div>
-                <input onChange={handleTextChange} className="mt-2"name="name" type="text" value={textVal} />
-                <button onClick={handleAddVal} className="border-2 border-dashed border-black bg-green-300 ml-2 mb-3">Add</button>
-            </div>
-            <ul>
-                {
-                    todos.map((todo, index) => (
-                        <li key={index}>
-                            {todo.name} <StatusDropDown dropDownStatus={todo.status} onStatusChange={(status) => handleStatusChange(todo, index, status)}></StatusDropDown>
-                            <Link href={`todo/${todo.id}`}>
-                                <button>Edit</button>
-                            </Link>
-                            <button onClick={() => handleDelete(todo.id)}>Delete</button>
-                        </li>
-                    ))
-
-                }
-            </ul>
         </>
     )
 }
