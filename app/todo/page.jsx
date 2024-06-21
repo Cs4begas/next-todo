@@ -2,11 +2,12 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import StatusDropDown from "../components/status_dropdown"
 import Link from 'next/link'
 import { getUserEmail } from './action'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import the FontAwesomeIcon component
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import CheckBox from "../components/check_box.jsx"
+import Loading from "../components/loading.jsx"
 
 
 function Page() {
@@ -25,10 +26,13 @@ function Page() {
     const [textVal, setTextVale] = useState('');
     const [refresh, setRefresh] = useState(false);
     const [userEmail, setUserEmail] = useState('');
+    const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
+        setLoading(!isLoading)
         getTodo(),
             fetchUserEmail()
+        setLoading(!isLoading)
     }, [refresh])
 
     const fetchUserEmail = async () => {
@@ -37,11 +41,14 @@ function Page() {
     };
 
     const handleStatusChange = async (todo, index, status) => {
-        console.log(status)
+        let checked = false;
+        if (status !== true || status !== false) {
+            checked = false
+        }
         setSelectedStatus(prevSelectedStatus => ({
             ...prevSelectedStatus,
             [index]: status,
-            status: status
+            status: !checked,
         }));
 
         console.log('Status to be updated:', status); // Log the status directly
@@ -49,7 +56,6 @@ function Page() {
         await putTodo(todo.id, status)
         setRefresh(!refresh)
         console.log('Prod', todo.status)
-        console.log(index, status)
     };
 
     async function handleDelete(id) {
@@ -60,7 +66,9 @@ function Page() {
 
     async function deleteTodos(id) {
         try {
+            setLoading(!isLoading)
             const response = await axios.delete(`https://664c5a5535bbda10988000cc.mockapi.io/todos/${id}`);
+            setLoading(!isLoading)
         } catch (error) {
             console.log('error', error)
         }
@@ -72,11 +80,13 @@ function Page() {
 
     async function putTodo(id, status) {
         try {
+            setLoading(!isLoading)
             let body = {
                 status: status
             }
             console.log(body)
             await axios.put(`https://664c5a5535bbda10988000cc.mockapi.io/todos/${id}`, body)
+            setLoading(!isLoading)
         } catch (error) {
             console.log('error', error)
         }
@@ -97,42 +107,48 @@ function Page() {
     }
     return (
         <>
-            <div className="container">
-                <div className="max-w-2xl mx-auto my-2">
-                    <div>
-                        User Email : {userEmail}
-                    </div>
-                    <div className="flex items-center">
-                        <input onChange={handleTextChange} className="input input-bordered w-full my-2" name="name" type="text" placeholder="Type Here" value={textVal} />
-                        <button onClick={handleAddVal} className="btn btn-primary ml-1">Add</button>
-                    </div>
-                    <ul>
-                        {
-                            todos.map((todo, index) => (
-                                <li key={index} className="flex items-center justify-between my-2">
-                                    <div>
-                                        {todo.name} <StatusDropDown dropDownStatus={todo.status} onStatusChange={(status) => handleStatusChange(todo, index, status)}></StatusDropDown>
-                                    </div>
-                                    <div>
-                                        <Link href={`todo/${todo.id}`}>
-                                            <button className="btn btn-square btn-outline ml-2">
-                                                <FontAwesomeIcon icon={faPen} />
-                                            </button>
-                                        </Link>
-                                        <button className="btn btn-square btn-outline ml-2" onClick={() => handleDelete(todo.id)}><FontAwesomeIcon icon={faTrash} /></button>
-                                    </div>
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </div>
-                <style jsx>{`
+            {isLoading ? (<div className="flex justify-center fixed inset-0"><Loading></Loading></div>)
+                : (
+                    <div className="container">
+                        <div className="max-w-2xl mx-auto my-2">
+                            <div>
+                                User Email : {userEmail}
+                            </div>
+                            <div className="flex items-center">
+                                <input onChange={handleTextChange} className="input input-bordered w-full my-2" name="name" type="text" placeholder="Type Here" value={textVal} />
+                                <button onClick={handleAddVal} className="btn btn-primary ml-1">Add</button>
+                            </div>
+                            <ul>
+                                {
+                                    todos.map((todo, index) => (
+                                        <li key={index} className="flex items-center justify-between my-2">
+                                            <div className="flex">
+                                                <CheckBox selectedStatus={todo.status} onClick={(status) => handleStatusChange(todo, index, status)}></CheckBox>
+                                                <div className={`ml-1 ${todo.status === true ? 'line-through' : ''}`}>
+                                                    {todo.name}
+                                                </div>
+                                            </div>
+                                            <div className="flex">
+                                                <Link href={`todo/${todo.id}`}>
+                                                    <button className="ml-2 h-8 w-8 flex items-center justify-center border border-gray-400 rounded">
+                                                        <FontAwesomeIcon icon={faPen} />
+                                                    </button>
+                                                </Link>
+                                                <button className="ml-2 h-8 w-8 flex items-center justify-center border border-gray-400 rounded" onClick={() => handleDelete(todo.id)}><FontAwesomeIcon icon={faTrash} /></button>
+                                            </div>
+                                        </li>
+                                    ))
+                                }
+                            </ul>
+                        </div>
+                        <style jsx>{`
                     svg{
                         fill: white
                     }
                 `}
-                </style>
-            </div>
+                        </style>
+                    </div>
+                )}
         </>
     )
 }

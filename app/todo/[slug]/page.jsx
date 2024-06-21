@@ -8,7 +8,8 @@ export default function Page({ params }) {
     const [todo, setTodo] = useState({
         id : '',
         name : '',
-        status: ''
+        status: false,
+        showStatus: ''
     });
 
     useEffect(() => {
@@ -23,6 +24,10 @@ export default function Page({ params }) {
 
     async function initBlog(id) {
         const response = await getTodoById(id);
+        if(response.status){
+            response.showStatus = 'Done'
+        }
+        else response.showStatus = 'Un Done'
         setTodo(response)
     }
 
@@ -63,7 +68,7 @@ export default function Page({ params }) {
                 </form>
             </div>
             <div>
-                STATUS: {todo.status}
+                STATUS: {todo.showStatus}
             </div>
         </>
     )
