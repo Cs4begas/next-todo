@@ -1,13 +1,14 @@
 'use client'
 
 import axios from "axios";
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
+import Loading from "../../components/loading";
 
 
 export default function Page({ params }) {
     const [todo, setTodo] = useState({
-        id : '',
-        name : '',
+        id: '',
+        name: '',
         status: false,
         showStatus: ''
     });
@@ -24,10 +25,9 @@ export default function Page({ params }) {
 
     async function initBlog(id) {
         const response = await getTodoById(id);
-        if(response.status){
-            response.showStatus = 'Done'
+        if (response.status) {
+            response.showStatus = response.status
         }
-        else response.showStatus = 'Un Done'
         setTodo(response)
     }
 
@@ -57,19 +57,21 @@ export default function Page({ params }) {
 
     return (
         <>
-            <div>
-                ID : {todo.id}
-            </div>
-            <div>
-                NAME:
-                <form action={handleSubmit}>
-                    <input type="text" name="name" value={todo.name} onChange={handleNameChange} />
-                    <button className="border-2 border-dashed border-black bg-green-300 ml-2 mb-3">Edit</button>
-                </form>
-            </div>
-            <div>
-                STATUS: {todo.showStatus}
-            </div>
+            <Suspense fallback={<Loading/>}>
+                <div>
+                    ID : {todo.id}
+                </div>
+                <div>
+                    NAME:
+                    <form action={handleSubmit}>
+                        <input type="text" name="name" value={todo.name} onChange={handleNameChange} />
+                        <button className="border-2 border-dashed border-black bg-green-300 ml-2 mb-3">Edit</button>
+                    </form>
+                </div>
+                <div>
+                    STATUS: {todo.showStatus}
+                </div>
+            </Suspense>
         </>
     )
 }

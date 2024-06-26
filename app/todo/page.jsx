@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import the 
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import CheckBox from "../components/check_box.jsx"
 import Loading from "../components/loading.jsx"
-
+import clsx from 'clsx';
 
 function Page() {
 
@@ -27,13 +27,21 @@ function Page() {
     const [refresh, setRefresh] = useState(false);
     const [userEmail, setUserEmail] = useState('');
     const [isLoading, setLoading] = useState(true);
+    const [statusList, setStatusList] = useState([]);
+    const dropDownList = ['Started', 'Pending', 'Done'];
+    const [selectedTab, setSelectedTab] = useState('Pending');
+    const conditionTab = 
 
     useEffect(() => {
-        setLoading(!isLoading)
+        setLoading(true)
         getTodo(),
             fetchUserEmail()
-        setLoading(!isLoading)
+        setLoading(false)
     }, [refresh])
+
+    const handleStatusList = (statusList) => {
+        setStatusList(statusList)
+    }
 
     const fetchUserEmail = async () => {
         const email = await getUserEmail();
@@ -66,9 +74,9 @@ function Page() {
 
     async function deleteTodos(id) {
         try {
-            setLoading(!isLoading)
+            setLoading(true)
             const response = await axios.delete(`https://664c5a5535bbda10988000cc.mockapi.io/todos/${id}`);
-            setLoading(!isLoading)
+            setLoading(false)
         } catch (error) {
             console.log('error', error)
         }
@@ -80,13 +88,11 @@ function Page() {
 
     async function putTodo(id, status) {
         try {
-            setLoading(!isLoading)
             let body = {
                 status: status
             }
             console.log(body)
             await axios.put(`https://664c5a5535bbda10988000cc.mockapi.io/todos/${id}`, body)
-            setLoading(!isLoading)
         } catch (error) {
             console.log('error', error)
         }
@@ -105,9 +111,16 @@ function Page() {
             console.log('error add value erorr', error)
         }
     }
+
+    async function handleOnClick( event ) {
+        console.log(event.target.textContent)
+        let data = event.target.textContent
+        setSelectedTab(data)
+    }
+
     return (
         <>
-            {isLoading ? (<div className="flex justify-center fixed inset-0"><Loading></Loading></div>)
+            {isLoading ? (<div className="flex justify-center fixed inset-0 bg-opacity-25"><Loading /></div>)
                 : (
                     <div className="container">
                         <div className="max-w-2xl mx-auto my-2">
@@ -118,9 +131,17 @@ function Page() {
                                 <input onChange={handleTextChange} className="input input-bordered w-full my-2" name="name" type="text" placeholder="Type Here" value={textVal} />
                                 <button onClick={handleAddVal} className="btn btn-primary ml-1">Add</button>
                             </div>
+                            <div role="tablist" className="tabs tabs-boxed mt-4">
+                                {dropDownList.map(data => (
+                                    <a key={data} role="tab" className={clsx(data === selectedTab ? "tab tab-active" : "tab")} onClick={(event) => handleOnClick(event)}>
+                                        {data}
+                                    </a>
+                                ))}
+                            </div>
                             <ul>
                                 {
                                     todos.map((todo, index) => (
+                                        todo.status === selectedTab &&
                                         <li key={index} className="flex items-center justify-between my-2">
                                             <div className="flex">
                                                 <CheckBox selectedStatus={todo.status} onClick={(status) => handleStatusChange(todo, index, status)}></CheckBox>
